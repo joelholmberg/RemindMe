@@ -25,7 +25,6 @@ public class LocationBasedServicesV1 extends MapActivity {
 	private MapView mapView;
 	private LocationManager locManager;
 	private LocationListener locListener;
-	private Model model;
 
 
 	@Override
@@ -34,9 +33,6 @@ public class LocationBasedServicesV1 extends MapActivity {
 		
 		//set this mapActivity to be the current view
 		setContentView(R.layout.activity_location_based_services_v1);
-		
-		//get a reference to the model
-		model = Model.getInstance(this);
 
 		//Create map and location manager
 		initMap();
@@ -57,8 +53,6 @@ public class LocationBasedServicesV1 extends MapActivity {
 	@Override
 	public void onResume(){
 		super.onResume();
-		//let model read from file and do some updating on the overlays to make sure they show on resume
-		model.update();
 	}
 	
 	/**
@@ -151,9 +145,6 @@ public class LocationBasedServicesV1 extends MapActivity {
 		// move to location
 		mapView.getController().animateTo(geopoint);
 		
-		//ask model to update its observers
-		model.update();
-
 		// redraw map
 		mapView.postInvalidate();
 	}
@@ -189,9 +180,6 @@ public class LocationBasedServicesV1 extends MapActivity {
 		// move to location
 		mapView.getController().animateTo(geopoint);
 		
-		//ask model to update its observers
-		model.update();
-
 		// redraw map
 		mapView.postInvalidate();
 	}

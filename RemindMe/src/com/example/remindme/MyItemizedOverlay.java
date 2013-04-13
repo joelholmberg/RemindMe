@@ -21,11 +21,10 @@ import com.google.android.maps.OverlayItem;
 
 //TODO: Låt denna klass sköta skapandet av overlayItems genom att läsa positioner alternativt geoCircles från modellen
  
-public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> implements Observer{
+public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
  
 	private List<OverlayItem> items;
 	private Drawable marker;
-	private Model model;
 	private Context context;
  
 	public MyItemizedOverlay(Drawable defaultMarker) {
@@ -33,8 +32,7 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> implements O
 		items = new ArrayList<OverlayItem>();
 		populate();
 		marker = defaultMarker;
-		model = Model.getInstance();
-		model.addObserver(this);
+
 		
 	}
 
@@ -49,7 +47,6 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> implements O
 		GeoCircle geoCircle = new GeoCircle(p.getLatitudeE6(), p.getLongitudeE6());
 //		GeoCircle mockupGeoCircle = new GeoCircle(p.getLatitudeE6(), p.getLongitudeE6());
 //		model.addMockupGeoCircle(mockupGeoCircle);
-		model.addGeoCircleToCurrentItem(geoCircle);
 		//model.addOverlayItem(item);
 		
         return true;
@@ -71,11 +68,11 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> implements O
         dialog.setCancelable(true);
         dialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                Log.i(this.getClass().getName(), "Selected Yes To use Location");
-                //What to do when user wants use selected location
-                Item testItem = SimpleItemFactory.createItem("test");
-                GeoCircle testCircle = new GeoCircle(id, id);
-                testItem.addGeoCircle(testCircle);
+//                Log.i(this.getClass().getName(), "Selected Yes To use Location");
+//                //What to do when user wants use selected location
+//                Item testItem = SimpleItemFactory.createItem("test");
+//                GeoCircle testCircle = new GeoCircle(id, id);
+//                testItem.addGeoCircle(testCircle);
                 
             }
         });
@@ -123,10 +120,5 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> implements O
 		
 	}
 
-	public void update(Observable observable, Object data) {
-		items = ((Model)observable).getOverlayItems();
-		populate();
-		
-	}
  
 }
