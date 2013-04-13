@@ -26,14 +26,18 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 	private List<OverlayItem> items;
 	private Drawable marker;
 	private Context context;
+	private NotesDbAdapter mDbHelper;
+	private Long mRowId; 
+	private static final Integer DEFAULT_RADIUS = 500; 
  
-	public MyItemizedOverlay(Drawable defaultMarker) {
+	public MyItemizedOverlay(Drawable defaultMarker, NotesDbAdapter notesDbAdapter, Long rowId) {
 		super(defaultMarker);
 		items = new ArrayList<OverlayItem>();
 		populate();
 		marker = defaultMarker;
-
-		
+		mRowId = rowId;
+		mDbHelper = notesDbAdapter;
+		mDbHelper.open();
 	}
 
  
@@ -44,11 +48,15 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 		Log.d("MyItemizedOverlay", "tapped on map");
 		//show dialogue first?
 		//OverlayItem item = new OverlayItem(p, "Title", "message");
-		GeoCircle geoCircle = new GeoCircle(p.getLatitudeE6(), p.getLongitudeE6());
+//		GeoCircle geoCircle = new GeoCircle(p.getLatitudeE6(), p.getLongitudeE6());
+		
+		
 //		GeoCircle mockupGeoCircle = new GeoCircle(p.getLatitudeE6(), p.getLongitudeE6());
 //		model.addMockupGeoCircle(mockupGeoCircle);
 		//model.addOverlayItem(item);
 		
+		mDbHelper.createPosition(mRowId, Integer.toString(p.getLatitudeE6()), Integer.toString(p.getLongitudeE6()), 
+				Integer.toString(DEFAULT_RADIUS));
         return true;
 	}
 	

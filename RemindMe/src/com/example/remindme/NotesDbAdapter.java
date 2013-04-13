@@ -140,10 +140,11 @@ public class NotesDbAdapter {
      * @param body the body of the note
      * @return rowId or -1 if failed
      */
-    public void createPosition(String latitude, String longitude, String radius) {
+    public void createPosition(long id, String latitude, String longitude, String radius) {
         if(latitude!=null && longitude!=null && radius!=null 
         		&& latitude!="" && longitude!="" && radius!=""){ 
             ContentValues initialValuesPosition = new ContentValues();
+            initialValuesPosition.put(KEY_ROWID, id);
             initialValuesPosition.put(KEY_LATITUDE, latitude);
             initialValuesPosition.put(KEY_LONGITUDE, longitude);
             initialValuesPosition.put(KEY_RADIUS, radius);

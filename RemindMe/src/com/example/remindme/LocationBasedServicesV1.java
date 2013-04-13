@@ -25,7 +25,8 @@ public class LocationBasedServicesV1 extends MapActivity {
 	private MapView mapView;
 	private LocationManager locManager;
 	private LocationListener locListener;
-
+	private NotesDbAdapter mDbHelper;
+	private Long mRowId;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -34,11 +35,24 @@ public class LocationBasedServicesV1 extends MapActivity {
 		//set this mapActivity to be the current view
 		setContentView(R.layout.activity_location_based_services_v1);
 
+		//Create dbHelper
+		mDbHelper = new NotesDbAdapter(this);
+		
+		//Fetch row Id from saved instance or bundle
+		mRowId = (savedInstanceState == null) ? null :
+            (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
+        if (mRowId == null) {
+            Bundle extras = getIntent().getExtras();
+            mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID) : null;
+        }
+        
 		//Create map and location manager
 		initMap();
 		initLocationManager();
 		
 		
+		
+
 	}
 
 	@Override
@@ -104,7 +118,7 @@ public class LocationBasedServicesV1 extends MapActivity {
 				.getIntrinsicHeight());
 
 		// create new overlay
-		MyItemizedOverlay overlay = new MyItemizedOverlay(icon);
+		MyItemizedOverlay overlay = new MyItemizedOverlay(icon, mDbHelper, mRowId);
 		
 		//Add newly created overlay to overlays list
 		overlays.add(overlay);
@@ -137,7 +151,7 @@ public class LocationBasedServicesV1 extends MapActivity {
 				.getIntrinsicHeight());
 
 		// create my overlay and show it
-		MyItemizedOverlay overlay = new MyItemizedOverlay(icon);
+		MyItemizedOverlay overlay = new MyItemizedOverlay(icon, mDbHelper, mRowId);
 		OverlayItem item = new OverlayItem(geopoint, "My Location", null);
 		overlay.addItem(item);
 		overlays.add(overlay);
@@ -172,7 +186,7 @@ public class LocationBasedServicesV1 extends MapActivity {
 				.getIntrinsicHeight());
 
 		// create my overlay and show it
-		MyItemizedOverlay overlay = new MyItemizedOverlay(icon);
+		MyItemizedOverlay overlay = new MyItemizedOverlay(icon, mDbHelper, mRowId);
 		OverlayItem item = new OverlayItem(geopoint, "My Location", null);
 		overlay.addItem(item);
 		overlays.add(overlay);

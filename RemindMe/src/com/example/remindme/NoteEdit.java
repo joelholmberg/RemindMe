@@ -55,6 +55,7 @@ public class NoteEdit extends Activity {
         mRowId = (savedInstanceState == null) ? null :
             (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
         if (mRowId == null) {
+        	
             Bundle extras = getIntent().getExtras();
             mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID)
                                     : null;
@@ -81,7 +82,9 @@ public class NoteEdit extends Activity {
     }
     
     protected void addPosition() {
-    	Intent i = new Intent(this, AddPosition.class);
+    	saveState();
+    	Intent i = new Intent(this, LocationBasedServicesV1.class);
+    	i.putExtra(NotesDbAdapter.KEY_ROWID, mRowId);
         startActivityForResult(i, ACTIVITY_ADD_POSITION);
 	}
 
@@ -137,7 +140,7 @@ public class NoteEdit extends Activity {
 
     	switch(requestCode) {
     	case ACTIVITY_ADD_POSITION:
-    		//TODO: For future work
+    		//TODO: Inform user that positions were added
     	}
     }
 }
