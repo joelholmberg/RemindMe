@@ -8,6 +8,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 //import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,10 +50,6 @@ public class LocationBasedServicesV1 extends MapActivity {
 		//Create map and location manager
 		initMap();
 		initLocationManager();
-		
-		
-		
-
 	}
 
 	@Override
@@ -217,17 +214,15 @@ public class LocationBasedServicesV1 extends MapActivity {
 	@Override  
 	public void onBackPressed() {
 		super.onBackPressed();
-		//Add the locations from the overlay to the model.
 		locManager.removeUpdates(locListener);
-		
-		//createReminder()
+
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-//			NavUtils.navigateUpFromSameTask(this);
+			NavUtils.navigateUpFromSameTask(this);
 			locManager.removeUpdates(locListener);
 			finish(); //TODO: save state?
 			return true;

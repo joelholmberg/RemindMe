@@ -132,12 +132,12 @@ public class NotesDbAdapter {
     }
     
     /**
-     * Create a new note using the title and body provided. If the note is
-     * successfully created return the new rowId for that note, otherwise return
-     * a -1 to indicate failure.
+     * Create a new position with specified radius for a note
      * 
-     * @param title the title of the note
-     * @param body the body of the note
+     * @param id the id of the note
+     * @param latitude the latitude of the point
+     * @param longitude the longitude of the point
+     * @param radius the radius of the circle around the point
      * @return rowId or -1 if failed
      */
     public void createPosition(long id, String latitude, String longitude, String radius) {
@@ -165,6 +165,8 @@ public class NotesDbAdapter {
     public boolean deleteNote(long rowId) {
 
         return mDb.delete(DATABASE_TABLE_NOTES, KEY_ROWID + "=" + rowId, null) > 0;
+        
+        //TODO: remove positions connected to this rowId
     }
 
     /**
@@ -191,6 +193,20 @@ public class NotesDbAdapter {
 
             mDb.query(true, DATABASE_TABLE_NOTES, new String[] {KEY_ROWID,
                     KEY_TITLE, KEY_BODY}, KEY_ROWID + "=" + rowId, null,
+                    null, null, null, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+
+    }
+    
+    public Cursor fetchPositions(long rowId) throws SQLException {
+
+        Cursor mCursor =
+
+            mDb.query(true, DATABASE_TABLE_POSITIONS, new String[] {KEY_ROWID,
+                    KEY_LATITUDE, KEY_LONGITUDE, KEY_RADIUS}, KEY_ROWID + "=" + rowId, null,
                     null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();

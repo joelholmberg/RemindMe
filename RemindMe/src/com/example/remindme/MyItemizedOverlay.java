@@ -23,7 +23,7 @@ import com.google.android.maps.OverlayItem;
  
 public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
  
-	private List<OverlayItem> items;
+	private List<OverlayItem> mItems;
 	private Drawable marker;
 	private Context context;
 	private NotesDbAdapter mDbHelper;
@@ -32,7 +32,7 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
  
 	public MyItemizedOverlay(Drawable defaultMarker, NotesDbAdapter notesDbAdapter, Long rowId) {
 		super(defaultMarker);
-		items = new ArrayList<OverlayItem>();
+		mItems = new ArrayList<OverlayItem>();
 		populate();
 		marker = defaultMarker;
 		mRowId = rowId;
@@ -43,17 +43,13 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
  
 	@Override
 	public boolean onTap(GeoPoint p, MapView mapView){
-		
-		//Show dialog, ask for radius, then call model to add geocircle to current item.
 		Log.d("MyItemizedOverlay", "tapped on map");
-		//show dialogue first?
-		//OverlayItem item = new OverlayItem(p, "Title", "message");
-//		GeoCircle geoCircle = new GeoCircle(p.getLatitudeE6(), p.getLongitudeE6());
+
+		//TODO: show dialogue first?
+		OverlayItem overlayItem = new OverlayItem(p, "Title", "message");
 		
-		
-//		GeoCircle mockupGeoCircle = new GeoCircle(p.getLatitudeE6(), p.getLongitudeE6());
-//		model.addMockupGeoCircle(mockupGeoCircle);
-		//model.addOverlayItem(item);
+		//Add a pin to the tapped position on the overlay
+		addItem(overlayItem);
 		
 		mDbHelper.createPosition(mRowId, Integer.toString(p.getLatitudeE6()), Integer.toString(p.getLongitudeE6()), 
 				Integer.toString(DEFAULT_RADIUS));
@@ -69,7 +65,7 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 	@Override
     protected boolean onTap(int index) {
 		Log.d("MyItemizedOverlay", "tapped at index" + index);
-        OverlayItem itemClicked = items.get(index);
+        OverlayItem itemClicked = mItems.get(index);
         AlertDialog.Builder dialog = new AlertDialog.Builder(context);
         dialog.setTitle(itemClicked.getTitle());
         dialog.setMessage("Use this location?");
@@ -97,13 +93,13 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 	
 	@Override
 	protected OverlayItem createItem(int index) {
-		return (OverlayItem)items.get(index);
+		return (OverlayItem)mItems.get(index);
 	}
  
 	
 	@Override
 	public int size() {
-		return items.size();
+		return mItems.size();
 	}
  
 	/*
@@ -120,7 +116,7 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 	}
  
 	public void addItem(OverlayItem overlay) {
-	    items.add(overlay);
+	    mItems.add(overlay);
 	    populate();
 	}
 	
