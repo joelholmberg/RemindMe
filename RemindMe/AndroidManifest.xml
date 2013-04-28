@@ -32,7 +32,7 @@
                 android:value="remindme.MainActivity" />
         </activity>
         <activity
-            android:name=".LocationBasedServicesV1"
+            android:name=".PositionService"
             android:label="@string/title_activity_location_based_services_v1" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

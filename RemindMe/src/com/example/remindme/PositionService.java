@@ -1,15 +1,15 @@
 package com.example.remindme;
 
 import java.util.List;
+
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-//import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -20,33 +20,35 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
+//import android.support.v4.app.NavUtils;
 
-public class LocationBasedServicesV1 extends MapActivity {
+public class PositionService extends MapActivity {
 
 	private MapView mapView;
 	private LocationManager locManager;
 	private LocationListener locListener;
 	private NotesDbAdapter mDbHelper;
 	private Long mRowId;
+	private MyItemizedOverlay pinOverlay;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		//set this mapActivity to be the current view
 		setContentView(R.layout.activity_location_based_services_v1);
 
 		//Create dbHelper
 		mDbHelper = new NotesDbAdapter(this);
-		
+
 		//Fetch row Id from saved instance or bundle
 		mRowId = (savedInstanceState == null) ? null :
-            (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
-        if (mRowId == null) {
-            Bundle extras = getIntent().getExtras();
-            mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID) : null;
-        }
-        
+			(Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ID);
+		if (mRowId == null) {
+			Bundle extras = getIntent().getExtras();
+			mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ID) : null;
+		}
+
 		//Create map and location manager
 		initMap();
 		initLocationManager();
@@ -58,14 +60,20 @@ public class LocationBasedServicesV1 extends MapActivity {
 		//move to current position when entering this view (create or resume)
 		moveToMyLocation(locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)!=null
 				?locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-				:locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+						:locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
 	}
-	
+
 	@Override
 	public void onResume(){
 		super.onResume();
+		
+		//Add existing items from db if there are any
+		addItemsFromDB();
+
+		// redraw map
+		mapView.postInvalidate();
 	}
-	
+
 	/**
 	 * Initializes the MyLocationOverlay and adds it to the overlays of the map
 	 */
@@ -75,7 +83,7 @@ public class LocationBasedServicesV1 extends MapActivity {
 		locListener = new LocationListener() {
 
 			public void onLocationChanged(Location newLocation) {
-				
+
 			}
 
 			public void onProviderDisabled(String arg0) {
@@ -91,8 +99,8 @@ public class LocationBasedServicesV1 extends MapActivity {
 				locListener);
 		locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
 				locListener);
-		
-		
+
+
 	}
 
 	/**
@@ -115,15 +123,29 @@ public class LocationBasedServicesV1 extends MapActivity {
 				.getIntrinsicHeight());
 
 		// create new overlay
-		MyItemizedOverlay overlay = new MyItemizedOverlay(icon, mDbHelper, mRowId);
-		
+		pinOverlay = new MyItemizedOverlay(icon, mDbHelper, mRowId);
+
 		//Add newly created overlay to overlays list
-		overlays.add(overlay);
+		overlays.add(pinOverlay);
+
+		//Add existing items from db if there are any
+		addItemsFromDB();
 
 		// redraw map
 		mapView.postInvalidate();
 
 	}
+
+
+	private void addItemsFromDB() {
+		Cursor cursor = mDbHelper.fetchPositions(mRowId);
+		while(!cursor.isAfterLast()){
+			pinOverlay.addItem(cursor.getString(1), cursor.getString(2), cursor.getString(3));
+			cursor.moveToNext();
+		}
+		mapView.postInvalidate();
+	}
+
 
 
 	/**
@@ -155,18 +177,18 @@ public class LocationBasedServicesV1 extends MapActivity {
 
 		// move to location
 		mapView.getController().animateTo(geopoint);
-		
+
 		// redraw map
 		mapView.postInvalidate();
 	}
-	
+
 	/**
 	 * This method will be called whenever a change of the current position
 	 * is submitted via the GPS.
 	 * @param newLocation
 	 */
 	protected void createAndShowMyLocationOverlay(Location newLocation) {
-		
+
 		List<Overlay> overlays = mapView.getOverlays();
 
 		// first remove old overlay
@@ -190,11 +212,11 @@ public class LocationBasedServicesV1 extends MapActivity {
 
 		// move to location
 		mapView.getController().animateTo(geopoint);
-		
+
 		// redraw map
 		mapView.postInvalidate();
 	}
-	
+
 	public void moveToMyLocation(Location newLocation){
 		GeoPoint geopoint = new GeoPoint((int) (newLocation.getLatitude() * 1E6), (int) (newLocation.getLongitude() * 1E6));
 		mapView.getController().animateTo(geopoint);
@@ -236,7 +258,7 @@ public class LocationBasedServicesV1 extends MapActivity {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
 
 
 }

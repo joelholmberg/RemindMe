@@ -34,7 +34,8 @@ public class MainActivity extends ListActivity {
     private static final int ACTIVITY_EDIT=1;
 
     private static final int INSERT_ID = Menu.FIRST;
-    private static final int DELETE_ID = Menu.FIRST + 1;
+    private static final int DELETE_ID = 2;
+    private static final int CLEAR_ID = 3;
 
     private NotesDbAdapter mDbHelper;
 
@@ -70,6 +71,7 @@ public class MainActivity extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.add(0, INSERT_ID, 0, R.string.menu_insert);
+        menu.add(0, CLEAR_ID, 1, R.string.menu_clear);
         return true;
     }
 
@@ -78,6 +80,9 @@ public class MainActivity extends ListActivity {
         switch(item.getItemId()) {
             case INSERT_ID:
                 createNote();
+                return true;
+            case CLEAR_ID:
+                mDbHelper.clearTables();
                 return true;
         }
 
@@ -112,7 +117,7 @@ public class MainActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         Intent i = new Intent(this, NoteEdit.class);
-        i.putExtra(NotesDbAdapter.KEY_ROWID, id);
+        i.putExtra(NotesDbAdapter.KEY_ID, id);
         startActivityForResult(i, ACTIVITY_EDIT);
     }
 

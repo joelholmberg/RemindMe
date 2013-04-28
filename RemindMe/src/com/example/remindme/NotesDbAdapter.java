@@ -38,7 +38,8 @@ public class NotesDbAdapter {
 
     public static final String KEY_TITLE = "title";
     public static final String KEY_BODY = "body";
-    public static final String KEY_ROWID = "_id";
+    public static final String KEY_ID = "_id";
+    public static final String KEY_NOTEID = "note_id";
     public static final String KEY_LATITUDE = "latitude";
     public static final String KEY_LONGITUDE = "longitude";
     public static final String KEY_RADIUS = "radius";
@@ -47,19 +48,27 @@ public class NotesDbAdapter {
     private DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
 
-    /**
-     * Database creation sql statement
-     */
-    private static final String DATABASE_CREATE =
-        "create table notes (_id integer primary key autoincrement, "
-        + "title text not null, body text not null); create table positions (_id integer primary key, "
-        + "latitude text not null, logitude text not null, radius text not null)";
+    
+//    private static final String DATABASE_DROP_TABLES =
+//    		""
 
     private static final String DATABASE_NAME = "data";
     private static final String DATABASE_TABLE_NOTES = "notes";
     private static final String DATABASE_TABLE_POSITIONS = "positions";
     private static final int DATABASE_VERSION = 2;
 
+    /**
+     * Database creation sql statement
+     */
+    private static final String DATABASE_CREATE_NOTES =
+        "create table " + DATABASE_TABLE_NOTES + "(_id integer primary key autoincrement, "
+        + "title text not null, body text not null)";
+    
+    private static final String DATABASE_CREATE_POSITIONS =
+            "create table " + DATABASE_TABLE_POSITIONS + "(_id integer primary key autoincrement, "
+            + "note_id integer not null, "+ "latitude text not null, longitude text not null, radius text not null)";
+    
+    
     private final Context mCtx;
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -71,14 +80,15 @@ public class NotesDbAdapter {
         @Override
         public void onCreate(SQLiteDatabase db) {
 
-            db.execSQL(DATABASE_CREATE);
+            db.execSQL(DATABASE_CREATE_NOTES);
+            db.execSQL(DATABASE_CREATE_POSITIONS);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS notes");
+            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE_NOTES +"; DROP TABLE IF EXISTS " + DATABASE_TABLE_POSITIONS);
             onCreate(db);
         }
     }
@@ -140,11 +150,11 @@ public class NotesDbAdapter {
      * @param radius the radius of the circle around the point
      * @return rowId or -1 if failed
      */
-    public void createPosition(long id, String latitude, String longitude, String radius) {
+    public void createPosition(long noteId, String latitude, String longitude, String radius) {
         if(latitude!=null && longitude!=null && radius!=null 
         		&& latitude!="" && longitude!="" && radius!=""){ 
             ContentValues initialValuesPosition = new ContentValues();
-            initialValuesPosition.put(KEY_ROWID, id);
+            initialValuesPosition.put(KEY_NOTEID, noteId);
             initialValuesPosition.put(KEY_LATITUDE, latitude);
             initialValuesPosition.put(KEY_LONGITUDE, longitude);
             initialValuesPosition.put(KEY_RADIUS, radius);
@@ -159,15 +169,53 @@ public class NotesDbAdapter {
     /**
      * Delete the note with the given rowId
      * 
-     * @param rowId id of note to delete
+     * @param noteId id of note to delete
      * @return true if deleted, false otherwise
      */
-    public boolean deleteNote(long rowId) {
-
-        return mDb.delete(DATABASE_TABLE_NOTES, KEY_ROWID + "=" + rowId, null) > 0;
+    public boolean deleteNote(long noteId) {
+    	
+        mDb.delete(DATABASE_TABLE_POSITIONS, KEY_NOTEID + "=" + noteId, null);
+        return mDb.delete(DATABASE_TABLE_NOTES, KEY_ID + "=" + noteId, null) > 0;
         
-        //TODO: remove positions connected to this rowId
     }
+    
+    public void clearTables(){
+    	dropTables();
+    	mDbHelper.onCreate(mDb);
+    }
+    
+    /**
+     * Drop tables
+     * 
+     */
+    public void dropTables() {
+    	
+        dropNotesTable();
+        dropPositionsTable();
+        
+    }
+    
+    /**
+     * Drop notes tables
+     * 
+     */
+    public void dropNotesTable() {
+    	
+        mDb.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE_NOTES);
+        
+    }
+    
+    /**
+     * Drop positions table
+     * 
+     */
+    public void dropPositionsTable() {
+    	
+    	mDb.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE_POSITIONS);
+        
+    }
+    
+    
 
     /**
      * Return a Cursor over the list of all notes in the database
@@ -176,7 +224,7 @@ public class NotesDbAdapter {
      */
     public Cursor fetchAllNotes() {
 
-        return mDb.query(DATABASE_TABLE_NOTES, new String[] {KEY_ROWID, KEY_TITLE,
+        return mDb.query(DATABASE_TABLE_NOTES, new String[] {KEY_ID, KEY_TITLE,
                 KEY_BODY}, null, null, null, null, null);
     }
 
@@ -191,8 +239,8 @@ public class NotesDbAdapter {
 
         Cursor mCursor =
 
-            mDb.query(true, DATABASE_TABLE_NOTES, new String[] {KEY_ROWID,
-                    KEY_TITLE, KEY_BODY}, KEY_ROWID + "=" + rowId, null,
+            mDb.query(true, DATABASE_TABLE_NOTES, new String[] {KEY_ID,
+                    KEY_TITLE, KEY_BODY}, KEY_ID + "=" + rowId, null,
                     null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -201,12 +249,19 @@ public class NotesDbAdapter {
 
     }
     
+    /**
+     * Return a Cursor positioned at the first position that matches the given rowId
+     * 
+     * @param rowId id of note from which positions will be fetched
+     * @return Cursor positioned to the first of the matching positions, if found. Each returned row holds 4 columns: _id, latitude, longitude, radius.
+     * @throws SQLException if positions could not be found/retrieved
+     */
     public Cursor fetchPositions(long rowId) throws SQLException {
 
         Cursor mCursor =
 
-            mDb.query(true, DATABASE_TABLE_POSITIONS, new String[] {KEY_ROWID,
-                    KEY_LATITUDE, KEY_LONGITUDE, KEY_RADIUS}, KEY_ROWID + "=" + rowId, null,
+            mDb.query(false, DATABASE_TABLE_POSITIONS, new String[] {KEY_ID,
+                    KEY_LATITUDE, KEY_LONGITUDE, KEY_RADIUS}, KEY_NOTEID + "=" + rowId, null,
                     null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -230,6 +285,6 @@ public class NotesDbAdapter {
         args.put(KEY_TITLE, title);
         args.put(KEY_BODY, body);
 
-        return mDb.update(DATABASE_TABLE_NOTES, args, KEY_ROWID + "=" + rowId, null) > 0;
+        return mDb.update(DATABASE_TABLE_NOTES, args, KEY_ID + "=" + rowId, null) > 0;
     }
 }

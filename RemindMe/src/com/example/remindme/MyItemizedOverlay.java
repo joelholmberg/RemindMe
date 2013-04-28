@@ -1,19 +1,15 @@
 package com.example.remindme;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.logging.Logger;
- 
+
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
- 
+
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;
@@ -50,7 +46,8 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 		
 		//Add a pin to the tapped position on the overlay
 		addItem(overlayItem);
-		
+		populate();
+		mapView.postInvalidate();
 		mDbHelper.createPosition(mRowId, Integer.toString(p.getLatitudeE6()), Integer.toString(p.getLongitudeE6()), 
 				Integer.toString(DEFAULT_RADIUS));
         return true;
@@ -115,14 +112,20 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 		boundCenterBottom(marker);
 	}
  
-	public void addItem(OverlayItem overlay) {
-	    mItems.add(overlay);
+	public void addItem(OverlayItem overlayItem) {
+	    mItems.add(overlayItem);
 	    populate();
+	}
+	
+	public void addItem(String lat, String lon, String radius) {
+		OverlayItem item = new OverlayItem(new GeoPoint(Integer.parseInt(lat), Integer.parseInt(lon)), "title", "msg");
+		this.addItem(item);
 	}
 	
 	public void addItemsFromFile(String filename) {
 		
 	}
+	
 
  
 }

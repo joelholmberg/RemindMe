@@ -53,11 +53,11 @@ public class NoteEdit extends Activity {
         Button addPositionButton = (Button) findViewById(R.id.add_position);
 
         mRowId = (savedInstanceState == null) ? null :
-            (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
+            (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ID);
         if (mRowId == null) {
         	
             Bundle extras = getIntent().getExtras();
-            mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID)
+            mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ID)
                                     : null;
         }
         
@@ -83,8 +83,8 @@ public class NoteEdit extends Activity {
     
     protected void addPosition() {
     	saveState();
-    	Intent i = new Intent(this, LocationBasedServicesV1.class);
-    	i.putExtra(NotesDbAdapter.KEY_ROWID, mRowId);
+    	Intent i = new Intent(this, PositionService.class);
+    	i.putExtra(NotesDbAdapter.KEY_ID, mRowId);
         startActivityForResult(i, ACTIVITY_ADD_POSITION);
 	}
 
@@ -105,7 +105,7 @@ public class NoteEdit extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         saveState();
-        outState.putSerializable(NotesDbAdapter.KEY_ROWID, mRowId);
+        outState.putSerializable(NotesDbAdapter.KEY_ID, mRowId);
     }
     
     @Override
