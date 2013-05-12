@@ -15,7 +15,8 @@
     <string name="title_activity_display_message">My Message</string>
     <string name="title_activity_set_location">SetLocationActivity</string>
     <string name="mapskey">01GhCWPAveLH-5QLGo5onFUOwHWKGsXrt7yQ_XQ</string>
-    <string name="title_activity_location_based_services_v1">LocationBasedServicesV1</string>
+    <string name="title_position_service">PositionService</string>
+    <string name="title_reminder_activity">Reminder</string>
     <string name="savefile">savefile.txt</string>
     <string name="yes">yes</string>
     <string name="no">no</string>

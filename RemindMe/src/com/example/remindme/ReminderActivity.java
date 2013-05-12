@@ -49,8 +49,11 @@ public class ReminderActivity extends Activity {
 		params.width  = LayoutParams.MATCH_PARENT;
 		getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
 
-		isEntered = savedInstanceState.getBoolean(LocationManager.KEY_PROXIMITY_ENTERING);
+		isEntered = getIntent().getExtras().getBoolean(LocationManager.KEY_PROXIMITY_ENTERING);
+		mDbAdapter = new NotesDbAdapter(this);
+		mDbAdapter.open();
 		
+		//Get current reminder object (by rowID) if already existing
 		if (savedInstanceState != null){
 			mRowId = (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ID);
 		}
@@ -70,10 +73,11 @@ public class ReminderActivity extends Activity {
 			public void onClick(View v) {
 				confirmed = true;
 				mDbAdapter.deleteNote(mRowId);
+				NavUtils.navigateUpFromSameTask(ReminderActivity.this);
 			}
 		});
 		
-		while (!confirmed){
+//		while (!confirmed){
 			try {
 				vibrate(2);
 				playSound(this, getAlarmUri(), 5000L);
@@ -82,7 +86,7 @@ public class ReminderActivity extends Activity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+//		}
 		
 
 	}
@@ -126,35 +130,45 @@ public class ReminderActivity extends Activity {
 
 	}
 	
-	private void playSound(Context context, Uri alert, Long milliseconds) throws InterruptedException {
-		mMediaPlayer = new MediaPlayer();
-		try {
-			mMediaPlayer.setDataSource(context, alert);
-			final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-			if (audioManager.getStreamVolume(AudioManager.STREAM_ALARM) != 0) {
-				mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-				mMediaPlayer.prepare();
-				mMediaPlayer.start();
-				Thread.sleep(milliseconds);
-				mMediaPlayer.stop();
-				mMediaPlayer.release();
+	private void playSound(final Context context, final Uri alert, final Long milliseconds) throws InterruptedException {
+		Runnable vibrateRunnable = new Runnable(){
+			public void run(){
+				mMediaPlayer = new MediaPlayer();
+				try {
+					mMediaPlayer.setDataSource(context, alert);
+					final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+					if (audioManager.getStreamVolume(AudioManager.STREAM_ALARM) != 0) {
+						mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+						mMediaPlayer.prepare();
+						mMediaPlayer.start();
+						Thread.sleep(milliseconds);
+						mMediaPlayer.stop();
+						mMediaPlayer.release();
+					}
+				} catch (IOException e) {
+					System.out.println("OOPS");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		} catch (IOException e) {
-			System.out.println("OOPS");
-		}
+		};
+		Thread vibrateThread = new Thread(vibrateRunnable);
+		vibrateThread.start();
+		
 	}
 
-	private void setAlarm(int seconds){
-		if (seconds == -1) {return;}
-		Intent intent = getIntent();
-		//Intent myIntent = new Intent(getParent(), getClass());
-		PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-		AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(System.currentTimeMillis());
-		calendar.add(Calendar.SECOND, seconds);
-		alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-	}
+//	private void setAlarm(int seconds){
+//		if (seconds == -1) {return;}
+//		Intent intent = getIntent();
+//		//Intent myIntent = new Intent(getParent(), getClass());
+//		PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+//		AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+//		Calendar calendar = Calendar.getInstance();
+//		calendar.setTimeInMillis(System.currentTimeMillis());
+//		calendar.add(Calendar.SECOND, seconds);
+//		alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+//	}
 	
 	private Uri getAlarmUri() {
 		Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
