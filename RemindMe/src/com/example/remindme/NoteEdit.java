@@ -17,6 +17,7 @@
 package com.example.remindme;
 
 import com.example.remindme.NotesDbAdapter;
+import com.example.remindme.R;
 
 import android.app.Activity;
 import android.content.Intent;
