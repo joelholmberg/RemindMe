@@ -269,6 +269,25 @@ public class NotesDbAdapter {
         return mCursor;
 
     }
+    
+    /**
+     * Return a Cursor positioned at the first position of all positions in DB
+     * 
+     * @return Cursor positioned to the first of the positions, if found. Each returned row holds 4 columns: _id, latitude, longitude, radius.
+     * @throws SQLException if positions could not be found/retrieved
+     */
+	public Cursor fetchAllPositions() {
+		
+		Cursor mCursor =
+
+	            mDb.query(false, DATABASE_TABLE_POSITIONS, new String[] {KEY_ID,
+	                    KEY_LATITUDE, KEY_LONGITUDE, KEY_RADIUS}, null, null,
+	                    null, null, null, null);
+	        if (mCursor != null) {
+	            mCursor.moveToFirst();
+	        }
+	        return mCursor;
+	}
 
     /**
      * Update the note using the details provided. The note to be updated is
@@ -287,4 +306,6 @@ public class NotesDbAdapter {
 
         return mDb.update(DATABASE_TABLE_NOTES, args, KEY_ID + "=" + rowId, null) > 0;
     }
+
+
 }
