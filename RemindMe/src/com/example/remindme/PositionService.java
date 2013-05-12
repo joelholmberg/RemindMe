@@ -62,6 +62,7 @@ public class PositionService extends MapActivity {
 
 		//Create dbHelper
 		mDbHelper = new NotesDbAdapter(this);
+		mDbHelper.open();
 
 		//Fetch row Id from saved instance or bundle
 		mRowId = (savedInstanceState == null) ? null :
@@ -74,6 +75,12 @@ public class PositionService extends MapActivity {
 		//Create map and location manager
 		initMap();
 		initLocationManager();
+		
+//		Only for debugging
+//		Intent intent = new Intent(getApplicationContext(), ReminderActivity.class);
+//		intent.putExtra(KEY_ROW_ID, mRowId);
+//		startActivity(intent);
+		
 	}
 
 	@Override
@@ -116,7 +123,6 @@ public class PositionService extends MapActivity {
 		locListener = new LocationListener() {
 
 			public void onLocationChanged(Location newLocation) {
-//				GeoPoint newGeoPoint = new GeoPoint((int)newLocation.getLatitude(), (int)newLocation.getLongitude());
 				
 				//Sync the list of what saved locations are in reach of the device within the sync time frame
 				if (!synchronizeSavedLocationsList()){
@@ -132,11 +138,6 @@ public class PositionService extends MapActivity {
 				for (GeoCircle savedLocation : mSavedLocations){
 					locManager.addProximityAlert(savedLocation.getLatitude(), savedLocation.getLongitude(), 
 							savedLocation.getRadius(), EXPIRATION_TIME, pendingIntent);
-//					if (savedLocation.isPointInside(newGeoPoint)){
-//						if (verifyEntered(savedLocation)){
-//							onEnter(savedLocation);
-//						}
-//					}
 				}
 			}
 
