@@ -132,7 +132,7 @@ public class PositionService extends MapActivity {
 				//Create reminder intent
 				Intent intent = new Intent(getApplicationContext(), ReminderActivity.class);
 				intent.putExtra(KEY_ROW_ID, mRowId);
-				PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 				
 				//Add proximity alerts to all saved locations that are within reach of the device within the sync time frame
 				for (GeoCircle savedLocation : mSavedLocations){
@@ -165,7 +165,7 @@ public class PositionService extends MapActivity {
 	 *  1. determine the estimated distance from current location to saved position
 	 *  2. reduce with the radius of saved position
 	 *  3. calculate time needed to reach position with average velocity of last 5 minutes
-	 *  4. if time needed is less them the interval of syncs, add to list 
+	 *  4. if time needed is less then the interval of syncs, add to list 
 	 *  
 	 *  @return true if sync was performed, false if no locatins exists, or time since last sync is to 
 	 *  small and no sync therefore was performed
