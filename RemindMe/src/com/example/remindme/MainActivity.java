@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -40,6 +41,7 @@ public class MainActivity extends ListActivity {
     private static final int CLEAR_ID = 3;
 
     private NotesDbAdapter mDbHelper;
+    private Button btnNewNote;
 
     /** Called when the activity is first created. */
     @Override
@@ -50,9 +52,12 @@ public class MainActivity extends ListActivity {
         mDbHelper.open();
         fillData();
         registerForContextMenu(getListView());
+        iniNewNoteBtn();
     }
 
-    private void fillData() {
+
+
+	private void fillData() {
         // Get all of the rows from the database and create the item list
         Cursor notesCursor = mDbHelper.fetchAllNotes();
         startManagingCursor(notesCursor);
@@ -67,6 +72,7 @@ public class MainActivity extends ListActivity {
         SimpleCursorAdapter notes = 
             new SimpleCursorAdapter(this, R.layout.notes_row, notesCursor, from, to);
         setListAdapter(notes);
+
     }
 
     @Override
@@ -84,7 +90,8 @@ public class MainActivity extends ListActivity {
                 createNote();
                 return true;
             case CLEAR_ID:
-                mDbHelper.clearTables();
+            	mDbHelper.clearTables();
+            	fillData();
                 return true;
         }
 
@@ -128,4 +135,13 @@ public class MainActivity extends ListActivity {
         super.onActivityResult(requestCode, resultCode, intent);
         fillData();
     }
+    
+    private void iniNewNoteBtn() {
+		btnNewNote = (Button)findViewById(R.id.new_note);
+		btnNewNote.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+            	createNote();
+            }
+        });
+	}
 }

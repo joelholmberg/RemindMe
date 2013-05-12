@@ -32,5 +32,6 @@
     <string name="add_position">Add Position</string>
     <string name="position_icon_alt">A position har been set för this reminder</string>
 	<string name="alarm_icon_alt">An alarm has been set for this reminder</string>
+	<string name="btn_add_note">New note</string>
 
 </resources>
