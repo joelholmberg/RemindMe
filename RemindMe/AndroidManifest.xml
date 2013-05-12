@@ -46,6 +46,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="remindme.MainActivity" />
         </activity>
+        <activity android:name="com.example.remindme.ReminderActivity"></activity>
     </application>
 
 </manifest>

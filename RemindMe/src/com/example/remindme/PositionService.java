@@ -160,7 +160,7 @@ public class PositionService extends MapActivity {
 	
 
 	/**
-	 * Synchronize the list of saved location. These locations are ones that can be reached before the next sync is performed.
+	 * Synchronize the list of saved locations. These locations are ones that can be reached before the next sync is performed.
 	 * The algorithm for determining if a position is reachable is shortly:
 	 *  1. determine the estimated distance from current location to saved position
 	 *  2. reduce with the radius of saved position
