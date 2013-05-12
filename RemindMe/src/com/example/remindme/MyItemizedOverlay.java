@@ -114,7 +114,8 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 		super.draw(canvas, mapView, shadow);
 		boundCenterBottom(marker);
-		drawRadius(canvas, mapView);
+		
+		if (!shadow) drawRadius(canvas, mapView);
 	}
  
 	private void drawRadius(Canvas canvas, MapView mapView) {
