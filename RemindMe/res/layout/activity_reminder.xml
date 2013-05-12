@@ -1,0 +1,49 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+   		android:layout_margin="10.0sp"
+        android:background="@color/white" >
+
+       
+        <TextView
+            android:id="@+id/reminderText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="PLACEHOLDER"
+            android:textColor="@color/light_blue"
+            android:textSize="35.0sp"
+            android:textStyle="bold"
+            tools:context=".ReminderActivity" />
+        
+        <Button
+            android:id="@+id/confirmButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/snoozeButton"
+            android:layout_alignBottom="@+id/snoozeButton"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="56dp"
+            android:text="OK" />
+
+        <Button
+            android:id="@+id/snoozeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="17dp"
+            android:layout_marginLeft="21dp"
+            android:text="Snooze" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
