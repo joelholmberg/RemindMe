@@ -16,23 +16,23 @@
         <uses-library android:name="com.google.android.maps" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.remindme.MainActivity"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".NoteEdit" />
+        <activity android:name="com.example.remindme.NoteEdit" />
         <activity
-            android:name=".SetLocationActivity"
+            android:name="com.example.remindme.SetLocationActivity"
             android:label="@string/title_activity_set_location" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="remindme.MainActivity" />
         </activity>
         <activity
-            android:name=".PositionService"
+            android:name="com.example.remindme.PositionService"
             android:label="@string/title_activity_location_based_services_v1" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
