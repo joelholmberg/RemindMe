@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -30,6 +31,7 @@ import com.google.android.maps.Projection;
 
 public class PositionService extends MapActivity {
 
+	private static final String PROXIMITY_INTENT_ACTION = new String("se.joelholmberg.android.proximityalerts.action.PROXIMITY_ALERT");
 	public static final String DB_PROVIDER = "db";
 	public static final String KEY_ROW_ID = "rowId";
 	private static final int LATITUDE_COLUMN = 1;
@@ -38,6 +40,7 @@ public class PositionService extends MapActivity {
 	protected static final long EXPIRATION_TIME = 300000; //5 minutes
 	protected static final int SYNC_TIME_INTERVAL = 300; //5 minutes
 	
+	private IntentFilter mIntentFilter;
 	private MapView mapView;
 	private LocationManager locManager;
 	private LocationListener locListener;
@@ -64,6 +67,9 @@ public class PositionService extends MapActivity {
 		mDbHelper = new NotesDbAdapter(this);
 		mDbHelper.open();
 
+		//Create the filter for the broadcast receiver
+		mIntentFilter = new IntentFilter(PROXIMITY_INTENT_ACTION);
+		
 		//Fetch row Id from saved instance or bundle
 		mRowId = (savedInstanceState == null) ? null :
 			(Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ID);
@@ -75,43 +81,43 @@ public class PositionService extends MapActivity {
 		//Create map and location manager
 		initMap();
 		initLocationManager();
-		
-//		Only for debugging
-//		Intent intent = new Intent(getApplicationContext(), ReminderActivity.class);
-//		intent.putExtra(KEY_ROW_ID, mRowId);
-//		startActivity(intent);
-		
 	}
+	
+	/**
+	 * Initialize the map and adds the zoom controls to the LinearLayout.
+	 */
+	private void initMap() {
+		mapView = (MapView) findViewById(R.id.mymap);
+		mapView.setBuiltInZoomControls(true);
+		mapView.displayZoomControls(true);
 
-	@Override
-	public void onStart(){
-		super.onStart();
-		//move to current position when entering this view (create or resume)
-		moveToMyLocation(locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)!=null
-				?locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-						:locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-	}
+		//Get all overlays from mapView
+		List<Overlay> overlays = mapView.getOverlays();
 
-	@Override
-	public void onResume(){
-		super.onResume();
+		// first remove old overlays
+		overlays.clear();
+
+		// initialize icon
+		Drawable icon = getResources().getDrawable(R.drawable.pin);
+		icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon
+				.getIntrinsicHeight());
+
+		// create new pin overlay
+		pinOverlay = new MyItemizedOverlay(icon, mDbHelper, mRowId);
 		
-		
-		//Start listening to location changes
-		myLocationOverlay.enableMyLocation();
-		
+		// create new circle-around-my-location overlay
+		myLocationOverlay = new MyLocationOverlay(this, mapView);
+
+		//Add newly created overlay to overlays list
+		overlays.add(pinOverlay);
+		overlays.add(myLocationOverlay);
+
 		//Add existing items from db if there are any
 		addItemsFromDB();
 
 		// redraw map
 		mapView.postInvalidate();
-	}
-	
-	@Override
-	public void onPause(){
-		super.onPause();
-		//Start listening to location changes
-			myLocationOverlay.disableMyLocation();
+
 	}
 
 	/**
@@ -132,12 +138,16 @@ public class PositionService extends MapActivity {
 				//Create reminder intent
 				Intent intent = new Intent(getApplicationContext(), ReminderActivity.class);
 				intent.putExtra(KEY_ROW_ID, mRowId);
-				PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 				
 				//Add proximity alerts to all saved locations that are within reach of the device within the sync time frame
+				int i = 0;
 				for (GeoCircle savedLocation : mSavedLocations){
-					locManager.addProximityAlert(savedLocation.getLatitude(), savedLocation.getLongitude(), 
-							savedLocation.getRadius(), EXPIRATION_TIME, pendingIntent);
+					setProximityAlert(intent, savedLocation.getLatitude(), 
+							savedLocation.getLongitude(), 
+		    				savedLocation.getRadius(), 
+		    				i);
+//					locManager.addProximityAlert(savedLocation.getLatitude(), savedLocation.getLongitude(), 
+//							savedLocation.getRadius(), EXPIRATION_TIME, pendingIntent);
 				}
 			}
 
@@ -158,6 +168,77 @@ public class PositionService extends MapActivity {
 
 	}
 	
+	@Override
+	public void onStart(){
+		super.onStart();
+		//move to current position when entering this view (create or resume)
+		moveToMyLocation(locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)!=null
+				?locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+						:locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+	}
+
+	@Override
+	public void onResume(){
+		super.onResume();
+		
+		/*
+		 * Register the Proximity Alert Receiver to the system, so that it 
+		 * will start picking up system intents that match the intentfilter
+		 */
+		registerReceiver(new ProximityAlertReceiver(), mIntentFilter);
+		
+		//Start listening to location changes
+		myLocationOverlay.enableMyLocation();
+		
+		//Add existing items from db if there are any
+		addItemsFromDB();
+
+		// redraw map
+		mapView.postInvalidate();
+	}
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		//Stop listening to location changes
+		myLocationOverlay.disableMyLocation();
+	}
+	
+	@Override
+	public void onStop(){
+		super.onStop();
+		//Stop listening to location changes
+		myLocationOverlay.disableMyLocation();
+	}
+
+	@Override  
+	public void onBackPressed() {
+		super.onBackPressed();
+		//TODO: keep listening to changes even after this view is closed, otherwise reminders won't work properly.
+		locManager.removeUpdates(locListener);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
+			//TODO: keep listening to changes even after this view is closed, otherwise reminders won't work properly.
+			locManager.removeUpdates(locListener);
+			finish(); //TODO: save state?
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	protected void setProximityAlert(Intent intent, double lat, double lon, int radius,
+			int requestCode) {
+    	
+    	PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+    	
+    	locManager.addProximityAlert(lat, lon, radius, EXPIRATION_TIME, pendingIntent);
+		
+	}
 
 	/**
 	 * Synchronize the list of saved locations. These locations are ones that can be reached before the next sync is performed.
@@ -175,9 +256,12 @@ public class PositionService extends MapActivity {
 		Time now = new Time();
 		now.setToNow();
 		
-		if (mTimeOfLastSync != null && now.toMillis(true) < (mTimeOfLastSync.toMillis(true) + SYNC_TIME_INTERVAL*1000)) return false;
+//		In debug comment out this line to always sync:
+//		if (mTimeOfLastSync != null && now.toMillis(true) < (mTimeOfLastSync.toMillis(true) + SYNC_TIME_INTERVAL*1000)) return false;
 		
 		mCurrentVelocity = getCurrentVelocity(); //Must be called before getCurrentPosition
+//		In debug use this line:
+		mCurrentVelocity = 1;
 		mCurrentPosition = getCurrentPosition();
 		mSavedLocations = new ArrayList<GeoCircle>();
 		Cursor cursor = mDbHelper.fetchAllPositions();
@@ -219,43 +303,8 @@ public class PositionService extends MapActivity {
 	}
 
 	/**
-	 * Initialize the map and adds the zoom controls to the LinearLayout.
+	 * Searches the database for locations for current reminder and created pin overlay items that are added to the overlay
 	 */
-	private void initMap() {
-		mapView = (MapView) findViewById(R.id.mymap);
-		mapView.setBuiltInZoomControls(true);
-		mapView.displayZoomControls(true);
-
-		//Get all overlays from mapView
-		List<Overlay> overlays = mapView.getOverlays();
-
-		// first remove old overlays
-		overlays.clear();
-
-		// initialize icon
-		Drawable icon = getResources().getDrawable(R.drawable.pin);
-		icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon
-				.getIntrinsicHeight());
-
-		// create new pin overlay
-		pinOverlay = new MyItemizedOverlay(icon, mDbHelper, mRowId);
-		
-		// create new circle-around-my-location overlay
-		myLocationOverlay = new MyLocationOverlay(this, mapView);
-
-		//Add newly created overlay to overlays list
-		overlays.add(pinOverlay);
-		overlays.add(myLocationOverlay);
-
-		//Add existing items from db if there are any
-		addItemsFromDB();
-
-		// redraw map
-		mapView.postInvalidate();
-
-	}
-
-
 	private void addItemsFromDB() {
 		Cursor cursor = mDbHelper.fetchPositions(mRowId);
 		if (cursor == null) return;
@@ -265,8 +314,6 @@ public class PositionService extends MapActivity {
 		}
 		mapView.postInvalidate();
 	}
-
-
 
 	/**
 	 * This method will be called whenever a change of the current position
@@ -353,34 +400,10 @@ public class PositionService extends MapActivity {
 		return true;
 	}
 
-	@Override  
-	public void onBackPressed() {
-		super.onBackPressed();
-		//TODO: keep listening to changes even after this view is closed, otherwise reminders won't work properly.
-		locManager.removeUpdates(locListener);
-
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
-			//TODO: keep listening to changes even after this view is closed, otherwise reminders won't work properly.
-			locManager.removeUpdates(locListener);
-			finish(); //TODO: save state?
-			return true;
-
-		}
-		return super.onOptionsItemSelected(item);
-	}
-
 	@Override
 	protected boolean isRouteDisplayed() {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-
 
 }

@@ -20,12 +20,11 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
-//TODO: Låt denna klass sköta skapandet av overlayItems genom att läsa positioner alternativt geoCircles från modellen
- 
+
+
 public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
  
 	private List<OverlayItem> mItems;
-	private Drawable marker;
 	private Context context;
 	private NotesDbAdapter mDbHelper;
 	private Long mRowId;
@@ -34,15 +33,37 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 	private static final Integer DEFAULT_RADIUS = 500; 
  
 	public MyItemizedOverlay(Drawable defaultMarker, NotesDbAdapter notesDbAdapter, Long rowId) {
-		super(defaultMarker);
+		super(boundCenterBottom(defaultMarker));
 		mItems = new ArrayList<OverlayItem>();
 		populate();
-		marker = defaultMarker;
+
+		//Save the ID of the reminder we're currently editing
 		mRowId = rowId;
+		
+		initDb(notesDbAdapter);
+		initPaint();
+	}
+
+	private void initDb(NotesDbAdapter notesDbAdapter) {
 		mDbHelper = notesDbAdapter;
 		mDbHelper.open();
-		
-		initPaint();
+	}
+	
+	private void initPaint() {
+		// Setup the stroke paint
+        mStrokePaint = new Paint();
+        mStrokePaint.setAntiAlias(true);
+        mStrokePaint.setStrokeWidth(2.0f);
+        mStrokePaint.setColor(0xff6666ff);
+        mStrokePaint.setStyle(Style.STROKE);
+        
+        // Setup the fill paint
+        mFillPaint = new Paint();
+        mFillPaint.setAntiAlias(true);
+        mFillPaint.setStrokeWidth(2.0f);
+        mFillPaint.setColor(0x186666ff);
+        mFillPaint.setStyle(Style.FILL);
+        mFillPaint.setAlpha(75);
 	}
 
 	@Override
@@ -96,7 +117,7 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 	 
 	@Override
 	protected OverlayItem createItem(int index) {
-		return (OverlayItem)mItems.get(index);
+		return mItems.get(index);
 	}
  
 	@Override
@@ -114,7 +135,7 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 		super.draw(canvas, mapView, shadow);
-		boundCenterBottom(marker);
+//		boundCenterBottom(marker);
 		
 		if (!shadow) drawRadius(canvas, mapView);
 	}
@@ -144,22 +165,7 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
 		this.addItem(item);
 	}
 	
-	private void initPaint() {
-		// Setup the stroke paint
-        mStrokePaint = new Paint();
-        mStrokePaint.setAntiAlias(true);
-        mStrokePaint.setStrokeWidth(2.0f);
-        mStrokePaint.setColor(0xff6666ff);
-        mStrokePaint.setStyle(Style.STROKE);
-        
-        // Setup the fill paint
-        mFillPaint = new Paint();
-        mFillPaint.setAntiAlias(true);
-        mFillPaint.setStrokeWidth(2.0f);
-        mFillPaint.setColor(0x186666ff);
-        mFillPaint.setStyle(Style.FILL);
-        mFillPaint.setAlpha(125);
-	}
+	
 	
 
  
