@@ -1,7 +1,9 @@
-package com.example.remindme;
+package se.joelholmberg.android.remindme;
 
 import java.io.IOException;
 import java.util.Calendar;
+
+import com.example.remindme.R;
 
 import android.app.Activity;
 import android.app.AlarmManager;

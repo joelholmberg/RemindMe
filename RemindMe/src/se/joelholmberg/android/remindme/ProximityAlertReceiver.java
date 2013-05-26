@@ -1,4 +1,4 @@
-package com.example.remindme;
+package se.joelholmberg.android.remindme;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

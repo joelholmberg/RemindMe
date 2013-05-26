@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.example.remindme;
+package se.joelholmberg.android.remindme;
 
 import android.content.ContentValues;
 import android.content.Context;

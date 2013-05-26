@@ -17,36 +17,36 @@
         <uses-library android:name="com.google.android.maps" />
 
         <activity
-            android:name="com.example.remindme.MainActivity"
+            android:name="se.joelholmberg.android.remindme.MainActivity"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.remindme.NoteEdit" />
+        <activity android:name="se.joelholmberg.android.remindme.NoteEdit" />
         <activity
-            android:name="com.example.remindme.SetLocationActivity"
+            android:name="se.joelholmberg.android.remindme.SetLocationActivity"
             android:label="@string/title_activity_set_location" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="remindme.MainActivity" />
         </activity>
         <activity
-            android:name="com.example.remindme.PositionService"
+            android:name="se.joelholmberg.android.remindme.PositionService"
             android:label="@string/title_position_service" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="remindme.MainActivity" />
         </activity>
         <activity 
-            android:name="com.example.remindme.ReminderActivity"
+            android:name="se.joelholmberg.android.remindme.ReminderActivity"
             android:label="@string/title_reminder_activity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="remindme.MainActivity" />
         </activity>
-        <activity android:name="com.example.remindme.ReminderActivity"></activity>
+        <activity android:name="se.joelholmberg.android.remindme.ReminderActivity"></activity>
     </application>
 
 </manifest>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.remindme;
+package se.joelholmberg.android.remindme;
 
 import com.example.remindme.R;
 

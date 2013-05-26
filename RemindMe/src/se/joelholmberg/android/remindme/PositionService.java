@@ -1,4 +1,4 @@
-package com.example.remindme;
+package se.joelholmberg.android.remindme;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ import com.google.android.maps.Projection;
 
 public class PositionService extends MapActivity {
 
-	private static final String PROXIMITY_INTENT_ACTION = new String("se.joelholmberg.android.proximityalerts.action.PROXIMITY_ALERT");
+	private static final String PROXIMITY_INTENT_ACTION = new String("se.joelholmberg.android.remindme.action.PROXIMITY_ALERT");
 	public static final String DB_PROVIDER = "db";
 	public static final String KEY_ROW_ID = "rowId";
 	private static final int LATITUDE_COLUMN = 1;
@@ -136,7 +136,8 @@ public class PositionService extends MapActivity {
 				}
 
 				//Create reminder intent
-				Intent intent = new Intent(getApplicationContext(), ReminderActivity.class);
+				//Intent intent = new Intent(getApplicationContext(), ReminderActivity.class);
+				Intent intent =new Intent(PROXIMITY_INTENT_ACTION);
 				intent.putExtra(KEY_ROW_ID, mRowId);
 				
 				//Add proximity alerts to all saved locations that are within reach of the device within the sync time frame
@@ -239,6 +240,10 @@ public class PositionService extends MapActivity {
     	locManager.addProximityAlert(lat, lon, radius, EXPIRATION_TIME, pendingIntent);
 		
 	}
+	
+	//TODO: Should we really use average velocity of last 5 minutes? Why not maximum velocity, to make sure we don't miss a reminder?
+	//		Also, the proximityAlert built into android already has a 4-minute interval for checking alerts if screen is black,
+	//		to minimize battery needed for GPS.
 
 	/**
 	 * Synchronize the list of saved locations. These locations are ones that can be reached before the next sync is performed.

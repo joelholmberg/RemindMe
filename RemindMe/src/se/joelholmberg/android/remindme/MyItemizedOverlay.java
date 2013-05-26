@@ -1,4 +1,4 @@
-package com.example.remindme;
+package se.joelholmberg.android.remindme;
 
 import java.util.ArrayList;
 import java.util.List;

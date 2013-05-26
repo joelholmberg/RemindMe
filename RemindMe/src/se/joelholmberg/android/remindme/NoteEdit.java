@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.example.remindme;
+package se.joelholmberg.android.remindme;
 
-import com.example.remindme.NotesDbAdapter;
+import se.joelholmberg.android.remindme.NotesDbAdapter;
+
 import com.example.remindme.R;
 
 import android.app.Activity;

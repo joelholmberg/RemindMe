@@ -1,4 +1,4 @@
-package com.example.remindme;
+package se.joelholmberg.android.remindme;
 //package com.example.remindme;
 //
 //import java.util.List;
