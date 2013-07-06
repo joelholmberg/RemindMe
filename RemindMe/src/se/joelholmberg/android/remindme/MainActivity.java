@@ -16,21 +16,20 @@
 
 package se.joelholmberg.android.remindme;
 
-import com.example.remindme.R;
-
+import android.app.IntentService;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class MainActivity extends ListActivity {
     private static final int ACTIVITY_CREATE=0;
@@ -42,17 +41,24 @@ public class MainActivity extends ListActivity {
 
     private NotesDbAdapter mDbHelper;
     private Button btnNewNote;
+    private Intent intent; 
+    private BackgroundService backgroundService;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        intent = new Intent(getApplicationContext(), BackgroundService.class);
+        getApplicationContext().startService(intent);
+        
         setContentView(R.layout.notes_list);
         mDbHelper = new NotesDbAdapter(this);
         mDbHelper.open();
         fillData();
         registerForContextMenu(getListView());
         iniNewNoteBtn();
+        
     }
 
 

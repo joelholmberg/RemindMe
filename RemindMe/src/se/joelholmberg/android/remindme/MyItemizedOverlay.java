@@ -13,7 +13,6 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.example.remindme.R;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapView;

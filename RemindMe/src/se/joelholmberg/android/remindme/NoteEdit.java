@@ -18,8 +18,6 @@ package se.joelholmberg.android.remindme;
 
 import se.joelholmberg.android.remindme.NotesDbAdapter;
 
-import com.example.remindme.R;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -85,7 +83,7 @@ public class NoteEdit extends Activity {
     
     protected void addPosition() {
     	saveState();
-    	Intent i = new Intent(this, PositionService.class);
+    	Intent i = new Intent(this, SetPositionView.class);
     	i.putExtra(NotesDbAdapter.KEY_ID, mRowId);
         startActivityForResult(i, ACTIVITY_ADD_POSITION);
 	}

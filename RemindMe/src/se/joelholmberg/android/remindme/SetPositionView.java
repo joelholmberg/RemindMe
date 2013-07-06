@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.hardware.Camera.Size;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,8 +19,8 @@ import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
-import com.example.remindme.R;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
@@ -29,7 +30,7 @@ import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 //import android.support.v4.app.NavUtils;
 
-public class PositionService extends MapActivity {
+public class SetPositionView extends MapActivity {
 
 	private static final String PROXIMITY_INTENT_ACTION = new String("se.joelholmberg.android.remindme.action.PROXIMITY_ALERT");
 	public static final String DB_PROVIDER = "db";
@@ -40,7 +41,7 @@ public class PositionService extends MapActivity {
 	protected static final long EXPIRATION_TIME = 300000; //5 minutes
 	protected static final int SYNC_TIME_INTERVAL = 300; //5 minutes
 	
-	private IntentFilter mIntentFilter;
+	
 	private MapView mapView;
 	private LocationManager locManager;
 	private LocationListener locListener;
@@ -54,6 +55,7 @@ public class PositionService extends MapActivity {
 	private int mCurrentVelocity;
 
 	private Time mTimeOfLastSync;
+	private ProximityAlertReceiver receiver;
 	public static boolean savedLocationsListSynched = false;
 
 	@Override
@@ -66,9 +68,7 @@ public class PositionService extends MapActivity {
 		//Create dbHelper
 		mDbHelper = new NotesDbAdapter(this);
 		mDbHelper.open();
-
-		//Create the filter for the broadcast receiver
-		mIntentFilter = new IntentFilter(PROXIMITY_INTENT_ACTION);
+		
 		
 		//Fetch row Id from saved instance or bundle
 		mRowId = (savedInstanceState == null) ? null :
@@ -182,12 +182,6 @@ public class PositionService extends MapActivity {
 	public void onResume(){
 		super.onResume();
 		
-		/*
-		 * Register the Proximity Alert Receiver to the system, so that it 
-		 * will start picking up system intents that match the intentfilter
-		 */
-		registerReceiver(new ProximityAlertReceiver(), mIntentFilter);
-		
 		//Start listening to location changes
 		myLocationOverlay.enableMyLocation();
 		
@@ -201,6 +195,7 @@ public class PositionService extends MapActivity {
 	@Override
 	public void onPause(){
 		super.onPause();
+
 		//Stop listening to location changes
 		myLocationOverlay.disableMyLocation();
 	}
@@ -216,7 +211,7 @@ public class PositionService extends MapActivity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		//TODO: keep listening to changes even after this view is closed, otherwise reminders won't work properly.
-		locManager.removeUpdates(locListener);
+		//locManager.removeUpdates(locListener);
 	}
 
 	@Override
@@ -286,6 +281,13 @@ public class PositionService extends MapActivity {
 		}
 		savedLocationsListSynched = true;
 		mTimeOfLastSync = now;
+		
+		//TODO: Delete
+		CharSequence text = "SetPositionView sync savedLocListSize = " + mSavedLocations.size();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+		toast.show();
+				
 		return true;
 	}
 
@@ -390,6 +392,7 @@ public class PositionService extends MapActivity {
 	}
 
 	public void moveToMyLocation(Location newLocation){
+		//TODO: Handle when Location is null (GPS not enabled for example)
 		GeoPoint geopoint = new GeoPoint((int) (newLocation.getLatitude() * 1E6), (int) (newLocation.getLongitude() * 1E6));
 		mapView.getController().animateTo(geopoint);
 	}
